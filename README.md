@@ -1,5 +1,5 @@
 # Structure
-
+```
 ./
 ├── Datasets
 │   ├── __init__.py
@@ -20,3 +20,4 @@
 │   └── similarity.py                            # Use similarity matrix as the embedding
 ├── similarity\ approach.ipynb
 └── utility.py                                   # Some useful utility functions
+```
