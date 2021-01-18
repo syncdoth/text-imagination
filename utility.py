@@ -2,7 +2,9 @@ import re
 
 import numpy as np
 from nltk.corpus import wordnet as wn
+from sklearn.utils.class_weight import compute_class_weight
 from tensorflow.keras.utils import to_categorical
+import tensorflow.keras.backend as K
 # from pywsd.similarity import max_similarity
 
 
@@ -68,3 +70,20 @@ def top_k_metric(pred, gt, k):
     recall = correct / gt.sum()
     f1 = 2 * (precision * recall) / (precision + recall)
     return precision, recall, f1
+
+
+def calculating_class_weights(y_true):
+    number_dim = np.shape(y_true)[1]
+    weights = np.zeros([number_dim, 2])
+    for i in range(1, number_dim):
+        weights[i] = compute_class_weight("balanced", classes=[0., 1.], y=y_true[:, i])
+    return weights
+
+
+def get_weighted_loss(weights):
+    def weighted_loss(y_true, y_pred):
+        return K.mean((weights[:, 0]**(1 - y_true)) * (weights[:, 1]**(y_true)) *
+                      K.binary_crossentropy(y_true, y_pred),
+                      axis=-1)
+
+    return weighted_loss

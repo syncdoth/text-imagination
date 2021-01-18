@@ -43,12 +43,6 @@ class SimilarityModel:
 
         self.model = model
 
-    def calculate_class_weight(self, labels, norm_constant=100.0):
-        weights = (1 / labels.sum(0)) * labels.sum() / norm_constant
-        weights = np.where(weights == np.inf, 0, weights)
-
-        return dict(zip(range(weights.shape[0]), weights))
-
     def train(self,
               train_data,
               train_labels,

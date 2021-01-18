@@ -27,7 +27,7 @@ class SequenceModel:
             h = keras.layers.LSTM(hidden_sizes[1])(h)
         else:
             h1 = keras.layers.Dense(hidden_sizes[0], activation="relu")(e)
-            s = tf.reduce_sum(axis=1)(h1)
+            s = tf.reduce_sum(h1, axis=1)
             h = keras.layers.Dense(hidden_sizes[1], activation="relu")(s)
 
         y = keras.layers.Dense(output_size, activation=output_activation)(h)
@@ -38,12 +38,6 @@ class SequenceModel:
                       metrics=metrics)
 
         self.model = model
-
-    def calculate_class_weight(self, labels, norm_constant=100.0):
-        weights = (1 / labels.sum(0)) * labels.sum() / norm_constant
-        weights = np.where(weights == np.inf, 0, weights)
-
-        return dict(zip(range(weights.shape[0]), weights))
 
     def train(self,
               train_data,

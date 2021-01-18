@@ -8,7 +8,11 @@ from .base_dataset import Dataset
 
 class SequenceDataset(Dataset):
     """When using this dataset, it is expected to use embedding layer in the model."""
-    def get_data_target(self, whole_dialog=False, filter_head_words=False, maxlen=300):
+    def get_data_target(self,
+                        whole_dialog=False,
+                        data_type="sequence",
+                        filter_head_words=False,
+                        maxlen=300):
         corpus = self.get_corpus()  #[N, D, t]
         desc = self.get_description()  #[N, D]
 
@@ -22,22 +26,25 @@ class SequenceDataset(Dataset):
 
         if self.mode == "train":
             self.fit_tokenizer(input_sents, target)
-        data = self.input_tokenizer.texts_to_sequences(input_sents)
+        if data_type == "sequence":
+            data = self.input_tokenizer.texts_to_sequences(input_sents)
+            if filter_head_words:
+                head_words = sorted(self.input_tokenizer.word_counts.items(),
+                                    key=lambda x: x[1],
+                                    reverse=True)[:10]
+                head_words_idx = {
+                    self.input_tokenizer.word_index[word[0]]
+                    for word in head_words
+                }
+                data = [[word for word in ex if word not in head_words_idx]
+                        for ex in data]
+
+            # Pad to square matrix
+            data = np.array([np.pad(ex, (0, maxlen - len(ex))) for ex in data])
+        else:
+            data = self.input_tokenizer.texts_to_matrix(input_sents, mode=data_type)
+
         labels = self.target_tokenizer.texts_to_sequences(target)
-
-        if filter_head_words:
-            head_words = sorted(self.input_tokenizer.word_counts.items(),
-                                key=lambda x: x[1],
-                                reverse=True)[:10]
-            head_words_idx = {
-                self.input_tokenizer.word_index[word[0]]
-                for word in head_words
-            }
-            data = [[word for word in ex if word not in head_words_idx] for ex in data]
-
-        # Pad to square matrix
-        data = np.array([np.pad(ex, (0, maxlen - len(ex))) for ex in data])
-
         labels = [
             to_categorical(label, num_classes=len(self.target_tokenizer.word_index) +
                            1).sum(axis=0) for label in labels
