@@ -1,4 +1,14 @@
-# Structure
+# Task Description
+
+This is a small project with the concept of "Imagination".
+
+The target of this project is to create a model that can "imagine" or generate out of context (OOC) words from some given context.
+
+## Dataset
+
+The dataset contains 2 parts: a dialogue and a description. The input to the model is the dialogue, and the target is OOC words, which are found in the description. The OOC words are defined as all the nouns that appear in description text such that do not appear in the dialogue.
+
+## Structure of the Repo
 ```
 ./
 ├── Datasets
@@ -21,3 +31,7 @@
 ├── similarity\ approach.ipynb
 └── utility.py                                   # Some useful utility functions
 ```
+
+## Experiment Results
+
+The best model can be found in `Naive Bayes.ipynb`. The deep learning models could achieve similar result with appropriate class weightings, but still Naive Bayes was better at modeling the problem.
